@@ -1,0 +1,1 @@
+// Define email storage schema
