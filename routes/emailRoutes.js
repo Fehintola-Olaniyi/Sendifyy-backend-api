@@ -1,6 +1,4 @@
 // Define API endpoints
 
 
-
-
-// API routes for user management (sign-up, login, etc.)
+// API routes for email management (create, send, receive)
