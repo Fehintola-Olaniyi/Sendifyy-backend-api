@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { registerUser, loginUser } = require('../controllers/userController');
 const { getUserProfile } = require('../controllers/userController')
-const authMiddleWare = require('../middlewares/authMiddleware')
+const authMiddleware = require('../middlewares/authMiddleware')
 
 //route for user registration
 router.post('/register', registerUser);
@@ -13,7 +13,7 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // @route GET /api/users/profile
-router.get('/profile',  authMiddleWare, getUserProfile);
+router.get('/profile',  authMiddleware, getUserProfile);
 
 
 module.exports = router;

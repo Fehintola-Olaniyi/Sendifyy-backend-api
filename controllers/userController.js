@@ -27,22 +27,30 @@ const loginUser = async (req, res) => {
 
 
 //get user profile
-const getUserProfile = async (req, res) => {
-    try {
-        //req.user should containthe authenticated userID from authMiddleware
-        const user = await User.findById(req.user.userId).select('-passowrd'); //exclude the password
+// const getUserProfile = async (req, res) => {
+//     try {
+//         //req.user should containthe authenticated userID from authMiddleware
+//         const user = await User.findById(req.user.userId).select('-password'); //exclude the password
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found'});
-        }
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found'});
+//         }
 
-        res.json(user);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send({ message: 'Server  error' });
-    }
+//         res.json(user);
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).send({ message: 'Server  error' });
+//     }
     
+// };
+
+const getUserProfile = (req, res) => {
+    res.status(200).json({
+        message: 'User profile retrieved successfully',
+        user: req.user // Access user info from the request
+    });
 };
+
 module.exports = { 
     registerUser,
     loginUser,

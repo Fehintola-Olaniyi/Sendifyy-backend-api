@@ -26,14 +26,17 @@ app.get('/', (req, res) => {
     res.send('Sendifyy backend API is running');
 });
 
+
+
+//import user rooutes 
+const userRoutes = require('./routes/userRoutes');
+
+//use user routes
+app.use('/api/user', userRoutes);
+
 // server listening
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
 
-//import user rooutes 
-const userRoutes = require('./routes/userRoutes');
-
-//use user routes
-app.use('/api/users', userRoutes);

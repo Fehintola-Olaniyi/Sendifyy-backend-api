@@ -28,12 +28,13 @@ exports.register = async (req, res) => {
 
         //generate JWT token
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expires:  '1h',
+            expiresIn:  '1h',
         });
 
         res.status(201).json({ token });
 
     } catch(error) {
+        console.log('Register Error:', error.message);
         res.status(500).json({ message: 'Server Error'});
     }
 };
@@ -43,7 +44,7 @@ exports.login = async  (req, res) => {
 
     try {
 
-        let user = await User.findone({ email });
+        let user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: 'Invalid Credentials'});
         }
@@ -56,7 +57,7 @@ exports.login = async  (req, res) => {
 
         const payload = { userId: user._id};
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expires: '1h',
+            expiresIn: '1h',
         });
         res.status(200).json({ token });
     } catch (err) {

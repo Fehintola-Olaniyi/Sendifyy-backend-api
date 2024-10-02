@@ -47,7 +47,7 @@ const bcrypt = require('bcryptjs');
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: true, //this line is making the name field required
   },
   email: {
     type: String,
