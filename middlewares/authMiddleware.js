@@ -2,6 +2,8 @@
 
 
 // Token-based authentication middleware (API key)
+//used to verify JWT tokens for protected routes
+//apply this middleware to routes that require authentication, such as creating email accounts or ccessing user data
 
 const jwt = require('jsonwebtoken');
 
@@ -22,6 +24,7 @@ const authMiddleware = ( req, res, next ) => {
 
         //attach user ID to request object; save user info to request object for later user
         req.user = decoded;
+        // console.log('middleware: req.user = ', req.user);//want to check if req.user is being set correctly
 
         next();  //pass/ continue to the next middleware or route handler
     } catch(err) {

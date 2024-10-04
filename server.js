@@ -1,9 +1,12 @@
-// Main entry point for the backend service
+// Main entry file for setting up the server and API routing
 
 const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/auth')
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/userRoutes');
+const emailRoutes = require('./routes/emailRoutes');
+
 
 //initialize the app
 dotenv.config();
@@ -27,12 +30,16 @@ app.get('/', (req, res) => {
 });
 
 
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'OK', message: 'API is running' });
+});
 
-//import user rooutes 
-const userRoutes = require('./routes/userRoutes');
 
 //use user routes
 app.use('/api/user', userRoutes);
+
+//use email routes
+app.use('/api/email', emailRoutes);
 
 // server listening
 const PORT = process.env.PORT || 5000;

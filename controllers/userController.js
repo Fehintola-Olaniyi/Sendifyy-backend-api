@@ -2,6 +2,7 @@
 
 
 // Functions for user - related features(sign - up, domain registration)
+//user operations(profile, settings)
 
 const User = require('../models/userModel') //dont know if this is really needed here tho
 const bycrpt = require('bcryptjs');
