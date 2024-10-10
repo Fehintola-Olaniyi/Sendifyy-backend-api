@@ -7,20 +7,44 @@ const User = require("../models/userModel");
 
 //controller to create an email address for a user
 const createEmailAddress = async (req, res) => {
-  const { emailPrefix } = req.body;
+  const { username, email } = req.body;
 
   try {
-    // console.log('Route handler: req.user =',  req.user);
-    // const { emailPrefix, domain } = req.body;// we're receiving the email prefix from the request body
-    const userId = req.user.userId; //extract userId from req.user
+    // // console.log('Route handler: req.user =',  req.user);
+    // // const { emailPrefix, domain } = req.body;// we're receiving the email prefix from the request body
+    // const userId = req.user.userId; //extract userId from req.user
+    const user = await User.findOne({ username });
 
-    //fetch the user from the database to get the domain
-    const user = await User.findById(userId);
+    //check if user exists
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const domain = user.domain;
+    //validate if the email belongs to the user's custom domain
+    const domain = email.split("@")[1];
+    if (domain !== user.domain) {
+      return res.status(400).json({
+        message: "Email domain does not match the user's custom domain.",
+      });
+    }
+
+    //add the new email address
+    if (!user.emailAddresses.includes(email)) {
+      user.emailAddresses.push(email);
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Email address created succesfully", email });
+    } else {
+      return res.status(409).json({ message: "Email address already exists." });
+    }
+    //fetch the user from the database to get the domain
+    // const user = await User.findById(userId);
+    // if (!user) {
+    //   return res.status(404).json({ message: "User not found" });
+    // }
+
+    // const domain = user.domain;
 
     // if(!emailPrefix || !domain) {
     //     return res.status(400).json({ message: 'Email prefix and domain are required'});
@@ -32,34 +56,34 @@ const createEmailAddress = async (req, res) => {
     // const domain = user.domain;
 
     //check if the user already has this email address
-    const emailAddress = `${emailPrefix}@${domain}`; //emailPrefix + custom domain
+    // const emailAddress = `${emailPrefix}@${domain}`; //emailPrefix + custom domain
 
-    console.log("User:", req.user); // To check if the authenticated user is properly passed in
-    console.log("Email prefix:", emailPrefix); // To check if the request body contains the correct emailPrefix
+    // console.log("User:", req.user); // To check if the authenticated user is properly passed in
+    // console.log("Email prefix:", emailPrefix); // To check if the request body contains the correct emailPrefix
 
-    //check if email address already exists
+    // //check if email address already exists
 
-    const existingEmail = await EmailAddress.findOne({ emailAddress });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email Address already exists" });
-    }
+    // const existingEmail = await EmailAddress.findOne({ emailAddress });
+    // if (existingEmail) {
+    //   return res.status(400).json({ message: "Email Address already exists" });
+    // }
 
-    //create a new email address for the user
-    const newEmailAddress = new EmailAddress({
-      user: user._id, //link the email address to the user; storing the user's Id; use the user's objectId
-      emailAddress,
-      domain, //: user.domain, //store the user's custom domain
-    });
-    //save the email address in the database
-    await newEmailAddress.save();
-    //return the success response
-    res.status(201).json({
-      message: "Email Address created successully",
-      emailAddress: newEmailAddress,
-    });
+    // //create a new email address for the user
+    // const newEmailAddress = new EmailAddress({
+    //   user: user._id, //link the email address to the user; storing the user's Id; use the user's objectId
+    //   emailAddress,
+    //   domain, //: user.domain, //store the user's custom domain
+    // });
+    // //save the email address in the database
+    // await newEmailAddress.save();
+    // //return the success response
+    // res.status(201).json({
+    //   message: "Email Address created successully",
+    //   emailAddress: newEmailAddress,
+    // });
   } catch (error) {
     console.log("Error creating email address", error.message);
-    res.status(400).json({ message: "Error creating email address" });
+    res.status(500).json({ message: "Error creating email address" });
   }
 };
 

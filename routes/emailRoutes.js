@@ -5,8 +5,9 @@ const express = require("express");
 const {
   createEmailAddress,
   receiveEmail,
+  sendMail,
 } = require("../controllers/emailController");
-const { sendMail } = require("../controllers/emailController");
+// const { sendMail } = require("../controllers/emailController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();

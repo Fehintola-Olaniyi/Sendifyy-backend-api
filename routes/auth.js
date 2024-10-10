@@ -1,15 +1,15 @@
 //this file will define the routes  related to authentication
 
-const express =  require('express');
+const express = require("express");
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const { registerUser, loginUser } = require("../controllers/userController");
 
 // @route POST / api/auth/register
 //  @desc Register a new  user
-router.post('/register', register);
+router.post("/register", registerUser);
 
 // @route POST / api/auth/login
 //  @desc login a new  user
-router.post('/login', login);
+router.post("/login", loginUser);
 
 module.exports = router;
