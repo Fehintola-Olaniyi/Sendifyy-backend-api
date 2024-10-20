@@ -1,12 +1,13 @@
 // Handles the business logic
 
-// Functions for user - related features(sign - up, domain registration)
+// Functions for user - related features(sign - up, login, domain registration)
 //user operations(profile, settings)
 
-const User = require("../models/userModel"); //dont know if this is really needed here tho
+const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const req = require("express/lib/request");
 const jwt = require("jsonwebtoken");
+const dns = require("dns");
 
 //register a new user
 const registerUser = async (req, res) => {
@@ -19,74 +20,114 @@ const registerUser = async (req, res) => {
         .status(400)
         .json({ message: "Username, password and domain are required" });
     }
-    //basic domain format validation
-    const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
-    if (!domainRegex.test(domain)) {
-      return res.status(400).json({ message: "Invalid domain name/format" });
+    //basic domain format validation (ensuring the domain isnt empty , it follows a valid format)
+    // function to validate domain format
+    function isValidDomain(domain) {
+      // const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+      const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-_]{1,63}\.)+[a-zA-Z]{2,6}$/;
+      return domainRegex.test(domain);
     }
+    // check domain format
+    if (!isValidDomain(domain)) {
+      return res.status(400).json({ message: "Invalid domain format" });
+    }
+
+    //will still need to implement advanced domain validation here (verify DNS records for the custom domain at the point of sign-up)
+    //need to implement a DNS verification system or send instructions to users on how to validate their ownership of the domain(e.g setting a specific DNS record to prove ownership)
+    //ensuring it's a real domain and not a random string
+
+    // DNS and MX Record validation
+    // For DNS validation we can use a package like dns (built-in with Node.js) to check if the domainhas the necessary MX Records
+    // installation
+    // npm install dns
+
+    // Function to check DNS and MX record validation
+    // function checkDomainMX(domain, callback) {
+    //   dns.resolveMx(domain, (err, addresses) => {
+    //     if (err) {
+    //       console.error("DNS lookup failed: ", err);
+    //       callback(false); // Domain invalid
+    //     } else if (!addresses || addresses.length === 0) {
+    //       console.log("No MX records found for domain.");
+    //       callback(false); // No MX records found
+    //     } else {
+    //       console.log("Valid MX records found: ", addresses);
+    //       callback(true); // Domain valid
+    //     }
+    //   });
+    // }
+
+    // // In your register function, call this before domain registration
+    // checkDomainMX(domain, (isValid) => {
+    //   if (!isValid) {
+    //     return res
+    //       .status(400)
+    //       .send({ error: "Domain is not valid or does not have MX records." });
+    //   }
+    //   // Continue with registration logic
+    // });
 
     //check if user with the same username already exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).json({ message: "Username is already taken" });
+      return res.status(409).json({ message: "Username is already taken" });
     }
 
+    //check if user with the same domain already exists
+    const existingDomain = await User.findOne({ domain });
+    if (existingDomain) {
+      return res.status(409).json({ message: "Domain is already taken" });
+    }
+
+    //create a new user
     const newUser = new User({
       username,
-      password, //: bcrypt.hashSync(password, 10),
-      domain,
+      password,
+      domain, //saving the custom domain provided
     });
 
     //save user to the database
     await newUser.save();
 
-    const payload = { userId: newUser._id };
-
     //generate JWT token
+    const payload = { userId: newUser._id };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
     res.status(201).json({
-      message: "User registered succesfully",
+      message: "User registered successfully",
       user: newUser,
       token: token,
     });
-    // //Add logic for registering a user (e.g saving to a db, hashing password)
-    // res.send('User Registered');
   } catch (error) {
     console.error("Error registering user: ", error.message);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 //login user
 const loginUser = async (req, res) => {
   try {
-    const { username, password, domain } = req.body;
+    const { username, password } = req.body;
 
     //validate input fields
-    if (!username || !password || !domain) {
+    if (!username || !password) {
       return res
         .status(400)
-        .json({ message: "Please provide a username, domain, and password." });
+        .json({ message: "Username and password are required" });
     }
 
-    //check if the user exists with the given username and password
-    const user = await User.findOne({ username, domain });
-    // console.log(user.password);
+    //check if the user exists with the given username
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).json({ message: "Invalid login credentials." });
     }
 
     //check if the password matches
     const isMatch = await bcrypt.compare(password, user.password);
-
-    // console.log(password);
-    // console.log(user.password);
-    // console.log(isMatch);
-
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid login credentials.." });
+      return res.status(400).json({ message: "Invalid login credentials." });
     }
 
     //   generate a JWT token for the user
@@ -128,6 +169,10 @@ const loginUser = async (req, res) => {
 //     }
 
 // };
+
+//torn between the which of the two approaches to use.
+// maybe to retrieve the user data from the database (as in the previous version) rather than just using req.user (as in the updated version),
+//ill check back later to compare the logic
 
 const getUserProfile = (req, res) => {
   res.status(200).json({

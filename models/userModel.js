@@ -2,8 +2,6 @@
 
 // Define user data schema
 
-// const mongoose = require('mongoose');
-// const bcrypt = require('bcrypt');
 // const { type } = require('express/lib/response');
 
 const mongoose = require("mongoose");
@@ -13,7 +11,7 @@ const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true, //this line is making the name field required
+      required: true,
       unique: true,
     },
     password: {
@@ -22,7 +20,7 @@ const UserSchema = new mongoose.Schema(
     },
     domain: {
       type: String,
-      required: true,
+      required: true, //make sure users have a custom domain
     },
     emailAddresses: [
       {
@@ -48,10 +46,5 @@ UserSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// dont know if this will be necessary later
-// The primary purpose of this method is to verify if the provided password (candidatePassword) matches the stored hashed password (this.password). This is commonly used in authentication processes to validate user credentials.
-// userSchema.methods.comparePassword = async function(candidatePassword) {
-//   return bcrypt.compare(candidatePassword, this.password);
-// };
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

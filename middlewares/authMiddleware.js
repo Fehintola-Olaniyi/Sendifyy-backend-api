@@ -6,6 +6,7 @@
 
 const jwt = require("jsonwebtoken");
 
+//Middleware to check if the user is authenticated
 const authMiddleware = (req, res, next) => {
   //get token from the header
   const token = req.header("Authorization")?.split(" ")[1]; //extract bearer token
@@ -24,7 +25,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded; // this should contain userId
     // console.log('middleware: req.user = ', req.user);//want to check if req.user is being set correctly
 
-    next(); //pass/ continue to the next middleware or route handler
+    next(); //continue to the next middleware or route handler
   } catch (err) {
     console.error("Token Validation error:", err);
     res.status(401).json({ message: "Token is not valid" });

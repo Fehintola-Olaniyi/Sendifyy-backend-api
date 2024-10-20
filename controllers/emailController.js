@@ -29,6 +29,7 @@ const createEmailAddress = async (req, res) => {
     }
 
     //add the new email address
+    //checks if the user has created an email with the same name before i.e if email already exists
     if (!user.emailAddresses.includes(email)) {
       user.emailAddresses.push(email);
       await user.save();
